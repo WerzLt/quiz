@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
 from main import Base
+from datetime import datetime
 
 engine = create_engine('sqlite:///quiz_game.db')
 Session = sessionmaker(bind=engine)
@@ -21,6 +22,8 @@ insert_data()
 class Main(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.buttons = []
+
 
     def center_window(self, window, width, height):
         screen_width = window.winfo_screenwidth()
@@ -44,11 +47,11 @@ class Main(tk.Tk):
 
     def hide_elements(self):
         name_entry.forget()
+        confirm_button.pack_forget()
+        name_exists.pack_forget()
         button1.pack_forget()
         button2.pack_forget()
         button3.pack_forget()
-        confirm_button.pack_forget()
-        name_exists.pack_forget()
 
     def logocreation(self):
         logo_image = PhotoImage(file="assets/logo.png")
@@ -184,22 +187,14 @@ class QuizGame:
             name_exists.pack(pady=20)
 
     def show_top_players(self):
-        root.hide_elements()
         results = session.query(Result).limit(5).all()
-
-        scrollbaras = Scrollbar(root)
-        boksas = Listbox(root, width=80, height=0, yscrollcommand=scrollbaras.set)
-
-        boksas.pack(side="left", fill="both", expand=True)
-        scrollbaras.pack(side="right", fill="y")
-        boksas.delete(0, END)
-
-        for result in results:
-            player_info = f"{result.user_id}. {result.user_username}, {result.level_id}, {result.score}, {result.data}"
-            boksas.insert(END, player_info)
-        back_button = tk.Button(root, text="Atgal", command=root.input_window)
-        back_button.pack(pady=10)
-
+        if results:
+            player_info = "\n".join(
+                [f"ID: {result.user_id}. Vardas: {result.user_username}, Lygis: {result.level_id}, Taškai: {result.score}, Data: {result.data}" for
+                 result in results])
+            messagebox.showinfo("Top 5 Žaidėjai", player_info)
+        else:
+            messagebox.showinfo("Top 5 Žaidėjai", "Šiuo metu sąrašas yra tuščias. Būk pirmas!")
     def start_game(self):
         root.hide_elements()
         self.update_question()
@@ -226,7 +221,8 @@ class QuizGame:
                 user_id=self.current_user.id,
                 user_username=self.current_user.username,
                 level_id=self.level,
-                score=self.user_score
+                score=self.user_score,
+                data=datetime.strptime(datetime.now().strftime("%Y/%m/%d, %H:%M:%S"), "%Y/%m/%d, %H:%M:%S")
             )
             session.add(user_result)
             session.commit()
@@ -249,12 +245,19 @@ root = Main()
 root.title("Quiz žaidimas")
 root.iconbitmap(r'assets/icon.ico')
 
+root.center_window(root, 1440, 800)
+root.configure(bg="#34495e")
+root.logocreation()
+
 quiz_obj = QuizGame()
 
-root.center_window(root, 1440, 900)
-root.configure(bg="#34495e")
+button1 = tk.Button(root, text="Pradėti žaidimą", command=root.input_window)
+button1.configure(bg="black", fg="white")
+button2 = tk.Button(root, text="TOP 5 Žaidėjai", command=quiz_obj.show_top_players)
+button2.configure(bg="black", fg="white")
+button3 = tk.Button(root, text="Išeiti iš žaidimo", command=root.destroy)
+button3.configure(bg="black", fg="white")
 
-root.logocreation()
 label = tk.Label(root, text="", font=("Helvetica", 16))
 level_label = tk.Label(root, text="", font=("Helvetica", 20))
 name_exists = tk.Label(root, text="", font=("Helvetica", 16))
@@ -262,89 +265,12 @@ name_entry = tk.Entry(root, bd=3)
 is_correct_answer = tk.Label(root, text="", font=("Helvetica", 16))
 remaining_time_label = tk.Label(root, text="", font=("Helvetica", 20))
 
-button1 = tk.Button(root, text="Pradėti žaidimą", command=root.input_window)
-button1.configure(bg="black", fg="white")
-button2 = tk.Button(root, text="TOP 5 Žaidėjai", command=quiz_obj.start_game)
-button2.configure(bg="black", fg="white")
-button3 = tk.Button(root, text="Išeiti iš žaidimo", command=root.destroy)
-button3.configure(bg="black", fg="white")
 confirm_button = tk.Button(root, text="Registruotis", command=lambda: quiz_obj.register(name_entry.get()))
 confirm_button.configure(bg="black", fg="red")
-name_entry.bind("<Return>", lambda event: quiz_obj.register(name_entry.get()))
+name_entry.bind("<Return>", lambda event: quiz_obj.register(name_entry.get()))\
 
 button1.pack(pady=10)
 button2.pack(pady=10)
 button3.pack(pady=10)
 
 root.mainloop()
-#                 question_id = input("Nurodykite klausimo ID, kurį norite pakeisti ")
-#                 question = session.get(Question, question_id)
-#                 if question:
-#                     question_update = input("Ką norite keisti? \n1 - Lygį \n2 - Klausimą \n3 - Atsakymą \nĮvestis: ")
-#                     question_level_range = 0
-#                     if question_update == "1":
-#                         while not int(question_level_range) in range(1, 7):
-#                             question_level_range = input("Pasirinkite lygį tarp 1 ir 7. ")
-#                             question.level_id = int(question_level_range)
-#                     if question_update == "2":
-#                         question_name = input("Įveskite naują lygio pavadinimą ")
-#                         question.text = question_name
-#                     if question_update == "3":
-#                         question_answer = input("Įveskite naują lygio atsakymą ")
-#                         question.correct_answer = question_answer
-#                     print(f"Pakeistas klausimas, kurio ID: {question_id}")
-#                     session.commit()
-#                 else:
-#                     print(f"Klausimas, kurio ID: {question_id} nerastas...")
-#             if admin_choice == "4":
-#                 Players_list()
-#                 player_id = input("Nurodykite žaidėjo ID, kurio taškus norite pakeisti ")
-#                 player = session.get(Result, player_id)
-#                 if player:
-#                     player_update = input("Įveskite naują taškų kiekį: ")
-#                     try:
-#                         player.score = int(player_update)
-#                         session.commit()
-#                         print(f"Pakeitėte žaidėjo, kurio ID: {player_id} taškus į {player_update}")
-#                     except ValueError:
-#                         print("Įvestas netinkamas taškų kiekis. Įveskite skaičių.")
-#                 else:
-#                     Players_list()
-#                     print("Žaidėjas nerastas!")
-#         except ValueError:
-#             print("Veskite tik skaičius!")
-#     else:
-#         print("Galbūt įvedėte ne tą slapyvardį?")
-# else:
-#     try:
-#         user = session.query(User).filter_by(username=name).first()
-#         user_choice = input("1 - Pradėti žaidimą\n2 - TOP 3 žaidėjai ")
-#         if user_choice == "1":
-#             print("Žaidimas prasidėjo DEMO režimu. Duomenų bazė nepildoma. :)")
-#             while True:
-#                 question = root.get_question()
-#                 print(f"---- {root.level} lygis ---- ")
-#                 print(f"Klausimas: {question.text}")
-#                 user_answer = input("Pasirinkite atsakymą (veskite skaičius, pvz. 1): ")
-#                 if root.correct_answer(user_answer, question):
-#                     print("Atsakymas teisingas")
-#                     root.user_score += 50
-#                     root.correct_answers += 1
-#                     if root.correct_answers == 5:
-#                         level = 2
-#                         print("Sveikiname jus pasiekėte antrą lygį!")
-#                 else:
-#                     print("Atsakymas neteisingas. Žaidimas baigtas.")
-#                     user_result = Result(
-#                         user_id=user.id,  # Use the user's id
-#                         user_username=name,
-#                         level_id=root.level,  # You might want to dynamically update this based on the user's progress
-#                         score=root.user_score
-#                     )
-#                     session.add(user_result)
-#                     session.commit()
-#                     break
-#         if user_choice == "2":
-#             Top_List()
-#     except ValueError:
-#         print("Veskite tik skaičius!")
