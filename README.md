@@ -10,13 +10,15 @@ Quiz žaidimas skirtas tiems, kurie nori pasitikrinti savo žinias.
 ## Instaliacija
 1 būdas: Atsisiunčiame zip failą ir pasileidžiame dist kataloge esantį quiz.exe failiuką.  
 2 būdas: Pasidarome klonavimą  
-'''python
+```python
 git clone https://github.com/WerzLt/quiz.git
-'''
+```
+
 Instaliuojame requirements.txt failiuką:  
-'''python
+```python
 pip install -r requirements.txt
-'''
+```
+
 Paleidžiame dist kataloge esantį quiz.exe failiuką  
 
 
