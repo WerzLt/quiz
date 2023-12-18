@@ -20,7 +20,3 @@ pip install -r requirements.txt
 ```
 
 Paleidžiame dist kataloge esantį quiz.exe failiuką  
-
-
-```bash
-pip install -r requirements.txt
