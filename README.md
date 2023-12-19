@@ -22,5 +22,5 @@ pip install -r requirements.txt
 Paleidžiame dist kataloge esantį quiz.exe failiuką  
 
 ## Kontaktai
-Edvinas Gipas
+Edvinas Gipas  
 Susisiekti galima email: werzlt4@gmail.com
